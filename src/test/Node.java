@@ -1,4 +1,4 @@
-package graph;
+package test;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -49,6 +49,18 @@ public class Node
         }
         visited.remove(this);
         return false;
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Node node = (Node) o;
+        return name.equals(node.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
     }
 
 }

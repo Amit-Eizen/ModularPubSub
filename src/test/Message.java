@@ -1,4 +1,4 @@
-package graph;
+package test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -28,13 +28,10 @@ public class Message {
     }
     public Message(byte[] msg)
     {
-        //String temp = new String(msg, StandardCharsets.UTF_8);
-        //this(temp);
         this((new String(msg, StandardCharsets.UTF_8)));
     }
     public Message(double asMsg)
     {
-        //String temp = String.valueOf(asMsg);
         this(String.valueOf(asMsg));
     }
 }

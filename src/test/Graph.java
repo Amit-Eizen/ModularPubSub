@@ -1,4 +1,4 @@
-package graph;
+package test;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,17 +19,21 @@ public class Graph extends ArrayList<Node>
     public void createFromTopics(){
         this.clear();
         Collection<Topic> allTopics = TopicManagerSingleton.get().getTopics();
-
         HashMap<String, Node> nodeMap = new HashMap<>();
-        for (Topic topic : allTopics) {  //Node for every Topic and Agent
-            nodeMap.putIfAbsent("T" + topic.name, new Node(topic.name));
 
+        for (Topic topic : allTopics) {  //Node for every Topic and Agent
+            String topicNodeName = "T" + topic.name;
+            nodeMap.putIfAbsent(topicNodeName, new Node(topicNodeName));
+        }
+        for (Topic topic : allTopics) {
             for (Agent agent : topic.getSubscribers()) {
-                nodeMap.putIfAbsent("A" + agent.getName(), new Node(agent.getName()));
+                String agentNodeName = "A" + agent.getName();
+                nodeMap.putIfAbsent(agentNodeName, new Node(agentNodeName));
             }
             for (Agent agent : topic.getPublishers()) {
-                nodeMap.putIfAbsent("A" + agent.getName(), new Node(agent.getName()));
-            }
+                String agentNodeName = "A" + agent.getName();
+                nodeMap.putIfAbsent(agentNodeName, new Node(agentNodeName));
+                }
         }
 
         for (Topic topic : allTopics) {  //  Edges from Topic to subscribers
@@ -48,7 +52,5 @@ public class Graph extends ArrayList<Node>
             }
         }
         this.addAll(nodeMap.values());
-    }    
-
-    
+    }
 }

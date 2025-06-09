@@ -9,8 +9,7 @@ public class Message {
     public final double asDouble;
     public final Date date;
 
-    public Message(String msg)
-    {
+    public Message(String msg) {
         double asDoubleTemp;
 
         this.data = msg.getBytes();

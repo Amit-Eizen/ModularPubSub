@@ -14,8 +14,7 @@ public class TopicManagerSingleton
         private static final TopicManager instance = new TopicManager();
         private final HashMap<String,Topic> topics = new HashMap<>();
 
-        private TopicManager()
-        { /*this.instance = new TopicManager(); */ }
+        private TopicManager() {}
 
         public Topic getTopic (String name)
         {

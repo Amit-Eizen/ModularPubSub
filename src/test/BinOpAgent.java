@@ -20,11 +20,10 @@ public class BinOpAgent implements Agent
 
         TopicManagerSingleton.get().getTopic(firstTopic).subscribe(this);
         TopicManagerSingleton.get().getTopic(secTopic).subscribe(this);
-        TopicManagerSingleton.get().getTopic(resTopic);
+        TopicManagerSingleton.get().getTopic(resTopic).addPublisher(this);
     }
     @Override
     public String getName() { return agentName; }
-
     @Override
     public void callback(String topic, Message msg) {
         if (topic.equals(topicNameOne)) msg1 = msg;
@@ -41,8 +40,6 @@ public class BinOpAgent implements Agent
     }
     @Override
     public void reset() { msg1 = null; msg2 = null; }
-
     @Override
     public void close() {}
-
-    }
+}

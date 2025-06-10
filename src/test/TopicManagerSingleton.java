@@ -2,6 +2,7 @@ package test;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class TopicManagerSingleton
 {
@@ -18,15 +19,15 @@ public class TopicManagerSingleton
 
         public Topic getTopic (String name)
         {
-            if(topics.containsKey(name))
-            {
-                return topics.get(name);
+            Objects.requireNonNull(name, "Topic name cannot be null");
+
+            Topic topic = topics.get(name);
+            if (topic == null) {
+                topic = new Topic(name);
+                topics.put(name, topic);
             }
-            else
-            {
-                topics.put(name, new Topic(name));
-                return topics.get(name);
-            }
+            return topic;
+
         }
         public Collection<Topic> getTopics() 
         {

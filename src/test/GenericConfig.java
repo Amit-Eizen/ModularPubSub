@@ -6,11 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class GenericConfig implements Config {
     private String configName;
-    private final List<Agent> agents = new ArrayList<>(); // Holds all wrapped agents
+    private List<ParallelAgent> agents = new ArrayList<>(); // Holds all wrapped agents
 
     public GenericConfig() {}
 
@@ -20,52 +19,91 @@ public class GenericConfig implements Config {
     @Override
     public void create() { // Reads the config file, creates agents, and wires them to topics.
         List<String> lines;
-        try { // Read all lines from the config file
-            lines = Files.readAllLines(Paths.get(configName)).stream().map(String::trim).filter(s -> !s.isEmpty()).collect(Collectors.toList());
+        try {   // Read all lines from the config file
+            lines = Files.readAllLines(Paths.get(configName));
         }
         catch (IOException e) {
             throw new RuntimeException("Failed to read config file", e);
         }
-
-        if (lines.size() % 3 != 0) // Check if the input is valid: must be divisible by 3
+        if (lines.size() % 3 != 0)  // Validate that the number of lines is divisible by 3
             throw new RuntimeException("Invalid config file: must be divisible by 3");
 
         for (int i = 0; i < lines.size(); i += 3) { // Process each agent definition (3 lines per agent)
+
             String className = lines.get(i).trim(); // Full class name (with package)
-            List<Topic> subs = parseTopics(lines.get(i + 1)); // Topics to subscribe to
-            List<Topic> pubs = parseTopics(lines.get(i + 2)); // Topics to publish to
+            if (className.isEmpty()) {
+                continue;
+            }
             try {
+                List<Topic> subs = parseTopics(lines.get(i + 1)); // Topics to subscribe to
+                List<Topic> pubs = parseTopics(lines.get(i + 2)); // Topics to publish to
+
                 // Reflection: load class and find the proper constructor (List<Topic>, List<Topic>)
                 Class<?> clazz = Class.forName(className);
                 Constructor<?> ctor = clazz.getConstructor(List.class, List.class);
                 Agent agent = (Agent) ctor.newInstance(subs, pubs);  // Create the agent instance
 
-                Agent wrappedAgent = new ParallelAgent(agent); // Wrap the agent with ParallelAgent decorator
+                ParallelAgent wrappedAgent = new ParallelAgent(agent); // Wrap the agent with ParallelAgent decorator
                 agents.add(wrappedAgent);
 
-                for (Topic t : subs) {t.subscribe(wrappedAgent);} // Subscribe the wrapped agent to each topic (subs)
+                /*for (Topic t : subs) {t.subscribe(wrappedAgent);} // Subscribe the wrapped agent to each topic (subs)
                 for (Topic t : pubs) {t.addPublisher(wrappedAgent);} // Add the wrapped agent as a publisher to each topic (pubs)
+*/
+                subscribeToTopicsSafely(wrappedAgent, subs, pubs);
 
             }
-            catch (ClassNotFoundException e) {
-                System.err.println("Class not found: " + className + " " + e.getMessage());
+            /*catch (ClassNotFoundException e) {
+                System.err.println("Class not found: " + " " + e.getMessage());
             }
             catch (NoSuchMethodException e) {
-                System.err.println("Constructor (List, List) not found for: " + className + " " + e.getMessage());
-            }
+                System.err.println("Constructor (List, List) not found for:" + " " + e.getMessage());
+            }*/
             catch (Exception e) {
-                System.err.println("Failed to create agent: " + className+ ", Reason: " + e.getMessage());
+                System.err.println("Skipping agent: " + className + ", Reason: " + e.getMessage());
             }
         }
     }
-    private List<Topic> parseTopics(String line) { // Helper function to parse a topic line into a list of Topic objects
-        List<Topic> res = new ArrayList<>();
-        if (line == null || line.trim().isEmpty()) return res;
-        for (String name : line.split(",")) {
-            res.add(TopicManagerSingleton.get().getTopic(name.trim()));
+
+    private List<Topic> parseTopics(String line) {
+        List<Topic> topics = new ArrayList<>();
+        if (line == null || line.trim().isEmpty()) {
+            return topics;
         }
-        return res;
+
+        String[] names = line.split(",");
+        for (String name : names) {
+            String topicName = name.trim();
+            if (!topicName.isEmpty() && isValidTopicName(topicName)) {
+                try {
+                    topics.add(TopicManagerSingleton.get().getTopic(topicName));
+                } catch (Exception e) {
+                    System.err.println("Failed to get topic: " + topicName);
+                }
+            }
+        }
+        return topics;
     }
+
+    private boolean isValidTopicName(String name) {
+        return name != null && !name.isEmpty() && name.length() < 100; // Basic validation
+    }
+    private void subscribeToTopicsSafely(ParallelAgent agent, List<Topic> subscribeTopics, List<Topic> publishTopics) {
+        try {
+            for (Topic t : subscribeTopics) {
+                if (t != null) {
+                    t.subscribe(agent);
+                }
+            }
+            for (Topic t : publishTopics) {
+                if (t != null) {
+                    t.addPublisher(agent);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Topic subscription failed: " + e.getMessage());
+        }
+    }
+
     @Override
     public String getName() {
         return this.configName;

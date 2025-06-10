@@ -1,45 +1,65 @@
 //package project_biu.test;
 package test;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class Topic
 {
     public final String name;
     private final List<Agent> subscribers = new ArrayList<>();
     private final List<Agent> publishers = new ArrayList<>();
-    Topic(String name)
+
+    public Topic(String name)
     {
-        this.name=name;
-    }
-    public void subscribe(Agent a)
-    {
-        subscribers.add(a);
-    }
-    public void unsubscribe(Agent a)
-    {
-        subscribers.remove(a);
-    }
-    public void publish(Message m)
-    {
-        for (Agent a : subscribers)
-        {
-            a.callback(this.name,m);
+        this.name = Objects.requireNonNull(name, "Topic name cannot be null");
+        if (name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Topic name cannot be empty");
         }
     }
-    public void addPublisher(Agent a)
-    {
-        publishers.add(a);
+    public String getName() {
+        return name;
     }
-    public void removePublisher(Agent a)
+
+    public void subscribe(Agent agent)
     {
-        publishers.remove(a);
+        Objects.requireNonNull(agent, "Agent cannot be null");
+        if (!subscribers.contains(agent)) {
+            subscribers.add(agent);
+        }
+
     }
+    public void unsubscribe(Agent agent) {
+        Objects.requireNonNull(agent, "Agent cannot be null");
+        subscribers.remove(agent);
+    }
+
+    public void publish(Message message) {
+        Objects.requireNonNull(message, "Message cannot be null");
+        for (Agent agent : subscribers) {
+            agent.callback(this.name, message);
+        }
+    }
+
+    public void addPublisher(Agent agent) {
+        Objects.requireNonNull(agent, "Agent cannot be null");
+        if (!publishers.contains(agent)) {
+            publishers.add(agent);
+        }
+    }
+
+    public void removePublisher(Agent agent) {
+        Objects.requireNonNull(agent, "Agent cannot be null");
+        publishers.remove(agent);
+    }
+
     public List<Agent> getSubscribers() {
-        return subscribers;
+        return Collections.unmodifiableList(subscribers);
     }
 
     public List<Agent> getPublishers() {
-        return publishers;
+        return Collections.unmodifiableList(publishers);
     }
 }

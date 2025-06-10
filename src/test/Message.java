@@ -10,9 +10,12 @@ public class Message {
     public final Date date;
 
     public Message(String msg) {
-        double asDoubleTemp;
+        if (msg == null) {
+            throw new IllegalArgumentException("msg cannot be null");
+        }
 
-        this.data = msg.getBytes();
+        double asDoubleTemp;
+        this.data = msg.getBytes(StandardCharsets.UTF_8);
         this.asText = msg;
         try
         {

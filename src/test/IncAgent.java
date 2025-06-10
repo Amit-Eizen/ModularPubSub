@@ -3,37 +3,52 @@ package test;
 import java.util.List;
 
 public class IncAgent implements Agent {
-    private final Topic m_sub1;
-    private final Topic m_pub;
-    private double increment;
-    public IncAgent(List<Topic> subs, List<Topic> pubs) {
-        if (subs == null || subs.isEmpty() || pubs == null || pubs.isEmpty()) {
-            throw new IllegalArgumentException("Lists cannot be null or empty");
+    private String name;
+    private String[] m_sub1;
+    private String[] m_pub;
+    private Topic inputTopic;
+    private Topic outputTopic;
+    public IncAgent(String[] subs, String[] pubs) {
+        this.name = "IncAgent";
+        m_sub1 = subs;
+        m_pub = pubs;
+
+        TopicManagerSingleton.TopicManager tm = TopicManagerSingleton.get();
+
+        if (subs.length >= 1) {
+            this.inputTopic = tm.getTopic(m_sub1[0]);
+            inputTopic.subscribe(this);
         }
 
-        m_sub1 = subs.get(0);
-        m_pub = pubs.get(0);
-        m_sub1.subscribe(this);
+        if (pubs.length >= 1) {
+            this.outputTopic = tm.getTopic(m_pub[0]);
+            outputTopic.addPublisher(this);
+        }
     }
-    public void setIncrement(double x) {increment = x;}
+
     @Override
     public String getName() {
-        return "IncAgent";
+        return name;
     }
     @Override
-    public void reset() {  increment = 0; }
+    public void reset() { }
     @Override
     public void callback(String topic, Message msg) {
-        if (topic != null && topic.equals(m_sub1.name)) {
-            if (!Double.isNaN(msg.asDouble)) {
-                this.setIncrement(msg.asDouble + 1);
-                m_pub.publish(new Message(increment));
+        if (!Double.isNaN(msg.asDouble)) {
+            double result = msg.asDouble + 1.0;
+            Message resultMessage = new Message(result);
+            if (outputTopic != null) {
+                outputTopic.publish(resultMessage);
             }
         }
     }
     @Override
     public void close() {
-        m_sub1.unsubscribe(this);
-        m_pub.removePublisher(this);
+        if (inputTopic != null) {
+            inputTopic.unsubscribe(this);
+        }
+        if (outputTopic != null) {
+            outputTopic.removePublisher(this);
+        }
     }
 }

@@ -5,26 +5,32 @@ import java.util.Objects;
 
 public class PlusAgent implements Agent {
 
+    private String name;
     private Topic m_sub1, m_sub2 ,m_pub;
     private double m_x=0, m_y=0;
     private boolean receivedX = false, receivedY = false;
+    private String[] subs;
+    private String[] pubs;
 
-    public PlusAgent(List<Topic> subs,List<Topic> pubs)
+    public PlusAgent(String[] subs, String[] pubs)
     {
-        Objects.requireNonNull(subs, "subs list cannot be null");
-        Objects.requireNonNull(pubs, "pubs list cannot be null");
+        this.name = "PlusAgent";
+        this.subs = subs;
+        this.pubs = pubs;
 
-        if (subs.size() < 2 || pubs.isEmpty()) {
-            throw new IllegalArgumentException("Need at least 2 subscribers and 1 publisher");
+        TopicManagerSingleton.TopicManager tm = TopicManagerSingleton.get();
+
+        if (subs.length >= 2) {
+            this.m_sub1 = tm.getTopic(subs[0]);
+            this.m_sub2 = tm.getTopic(subs[1]);
+            m_sub1.subscribe(this);
+            m_sub2.subscribe(this);
         }
 
-        m_sub1 = Objects.requireNonNull(subs.get(0), "sub1 cannot be null");
-        m_sub2 = Objects.requireNonNull(subs.get(1), "sub2 cannot be null");
-        m_pub = Objects.requireNonNull(pubs.get(0), "pub cannot be null");
-
-        m_sub1.subscribe(this);
-        m_sub2.subscribe(this);
-        m_pub.addPublisher(this);
+        if (pubs.length >= 1) {
+            this.m_pub = tm.getTopic(pubs[0]);
+            m_pub.addPublisher(this);
+        }
     }
     public double getX() {return this.m_x;}
     public double getY() {return this.m_y;}
@@ -33,7 +39,7 @@ public class PlusAgent implements Agent {
 
     @Override
     public String getName() {
-        return "PlusAgent";
+        return name;
     }
     @Override
     public void reset() {
@@ -43,18 +49,19 @@ public class PlusAgent implements Agent {
     }
     @Override
     public void callback(String topic, Message msg) {
-        if (m_sub1.name.equals(topic)) {
-            m_x = msg.asDouble;
-            receivedX = true;
-        }
-        else if (m_sub2.name.equals(topic)) {
-            m_y = msg.asDouble;
-            receivedY = true;
-        }
-        if (receivedX && receivedY) {
-            double sum = m_x + m_y;
-            m_pub.publish(new Message(sum));
-            receivedX = receivedY = false;
+        if (!Double.isNaN(msg.asDouble)) {
+            if (m_sub1.name.equals(topic)) {
+                m_x = msg.asDouble;
+                receivedX = true;
+            } else if (m_sub2.name.equals(topic)) {
+                m_y = msg.asDouble;
+                receivedY = true;
+            }
+            if (receivedX && receivedY) {
+                double sum = m_x + m_y;
+                m_pub.publish(new Message(sum));
+                receivedX = receivedY = false;
+            }
         }
     }
     @Override

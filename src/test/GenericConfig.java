@@ -1,5 +1,7 @@
 package test;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.nio.file.Files;
@@ -9,98 +11,82 @@ import java.util.List;
 
 public class GenericConfig implements Config {
     private String configName;
-    private List<ParallelAgent> agents = new ArrayList<>(); // Holds all wrapped agents
-
-    public GenericConfig() {}
+    //private List<ParallelAgent> agents = new ArrayList<>(); // Holds all wrapped agents
+    private List<Agent> agents;
+    public GenericConfig() {
+        agents = new ArrayList<>();
+    }
 
     public void setConfFile(String configName) {
         this.configName = configName;
     }
     @Override
     public void create() { // Reads the config file, creates agents, and wires them to topics.
-        List<String> lines;
-        try {   // Read all lines from the config file
-            lines = Files.readAllLines(Paths.get(configName));
-        }
-        catch (IOException e) {
-            throw new RuntimeException("Failed to read config file", e);
-        }
-        if (lines.size() % 3 != 0)  // Validate that the number of lines is divisible by 3
-            throw new RuntimeException("Invalid config file: must be divisible by 3");
-
-        for (int i = 0; i < lines.size(); i += 3) { // Process each agent definition (3 lines per agent)
-
-            String className = lines.get(i).trim(); // Full class name (with package)
-            if (className.isEmpty()) {
-                continue;
-            }
-            try {
-                List<Topic> subs = parseTopics(lines.get(i + 1)); // Topics to subscribe to
-                List<Topic> pubs = parseTopics(lines.get(i + 2)); // Topics to publish to
-
-                // Reflection: load class and find the proper constructor (List<Topic>, List<Topic>)
-                Class<?> clazz = Class.forName(className);
-                Constructor<?> ctor = clazz.getConstructor(List.class, List.class);
-                Agent agent = (Agent) ctor.newInstance(subs, pubs);  // Create the agent instance
-
-                ParallelAgent wrappedAgent = new ParallelAgent(agent); // Wrap the agent with ParallelAgent decorator
-                agents.add(wrappedAgent);
-
-                /*for (Topic t : subs) {t.subscribe(wrappedAgent);} // Subscribe the wrapped agent to each topic (subs)
-                for (Topic t : pubs) {t.addPublisher(wrappedAgent);} // Add the wrapped agent as a publisher to each topic (pubs)
-*/
-                subscribeToTopicsSafely(wrappedAgent, subs, pubs);
-
-            }
-            /*catch (ClassNotFoundException e) {
-                System.err.println("Class not found: " + " " + e.getMessage());
-            }
-            catch (NoSuchMethodException e) {
-                System.err.println("Constructor (List, List) not found for:" + " " + e.getMessage());
-            }*/
-            catch (Exception e) {
-                System.err.println("Skipping agent: " + className + ", Reason: " + e.getMessage());
-            }
-        }
-    }
-
-    private List<Topic> parseTopics(String line) {
-        List<Topic> topics = new ArrayList<>();
-        if (line == null || line.trim().isEmpty()) {
-            return topics;
+        if (configName == null) {
+            System.err.println("Config file not set!");
+            return;
         }
 
-        String[] names = line.split(",");
-        for (String name : names) {
-            String topicName = name.trim();
-            if (!topicName.isEmpty() && isValidTopicName(topicName)) {
-                try {
-                    topics.add(TopicManagerSingleton.get().getTopic(topicName));
-                } catch (Exception e) {
-                    System.err.println("Failed to get topic: " + topicName);
-                }
-            }
-        }
-        return topics;
-    }
-
-    private boolean isValidTopicName(String name) {
-        return name != null && !name.isEmpty() && name.length() < 100; // Basic validation
-    }
-    private void subscribeToTopicsSafely(ParallelAgent agent, List<Topic> subscribeTopics, List<Topic> publishTopics) {
         try {
-            for (Topic t : subscribeTopics) {
-                if (t != null) {
-                    t.subscribe(agent);
+            List<String> lines = readConfigFile(configName);
+
+            if (lines.size() % 3 != 0) { // Validate that the number of lines is divisible by 3
+                System.err.println("Invalid config file: must be divisible by 3");
+            }
+
+            for (int i = 0; i < lines.size(); i += 3) { // Process each agent definition (3 lines per agent)
+                String className = lines.get(i).trim();
+                String subsLine = lines.get(i + 1).trim();
+                String pubsLine = lines.get(i + 2).trim();
+
+                String[] subs = subsLine.isEmpty() ? new String[0] : subsLine.split(",");
+                String[] pubs = pubsLine.isEmpty() ? new String[0] : pubsLine.split(",");
+
+                for (int j = 0; j < subs.length; j++) {
+                    subs[j] = subs[j].trim();
+                }
+                for (int j = 0; j < pubs.length; j++) {
+                    pubs[j] = pubs[j].trim();
+                }
+                Agent agent = createAgentInstance(className, subs, pubs);
+                if (agent != null) {
+                    agents.add(agent);
                 }
             }
-            for (Topic t : publishTopics) {
-                if (t != null) {
-                    t.addPublisher(agent);
-                }
+        }
+        catch(IOException e){
+            System.err.println("Error reading config file: " + e.getMessage());
+        }
+    }
+    private List<String> readConfigFile(String fileName) throws IOException {
+        List<String> lines = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
             }
+        }
+        return lines;
+    }
+
+    private Agent createAgentInstance(String className, String[] subs, String[] pubs) {
+        try {
+            Class<?> clazz = Class.forName(className);
+
+            Constructor<?> constructor = clazz.getConstructor(String[].class, String[].class);
+
+            Object instance = constructor.newInstance(subs, pubs);
+
+            if (instance instanceof Agent) {
+                return (Agent) instance;
+            } else {
+                System.err.println("Class " + className + " does not implement Agent interface");
+                return null;
+            }
+
         } catch (Exception e) {
-            System.err.println("Topic subscription failed: " + e.getMessage());
+            System.err.println("Error creating agent instance for " + className + ": " + e.getMessage());
+            return null;
         }
     }
 
@@ -117,5 +103,6 @@ public class GenericConfig implements Config {
         for (Agent a : agents) {
             a.close();
         }
+        agents.clear();
     }
 }

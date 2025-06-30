@@ -1,7 +1,4 @@
-package test;
-
-import java.util.List;
-import java.util.Objects;
+package graph;
 
 public class PlusAgent implements Agent {
 

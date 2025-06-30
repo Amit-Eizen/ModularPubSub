@@ -18,7 +18,7 @@
 
 ---------------  S U M M A R Y ------------
 
-Command Line: -agentlib:jdwp=transport=dt_socket,address=127.0.0.1:51115,suspend=y,server=n -javaagent:C:\Users\amite\AppData\Local\JetBrains\IntelliJIdea2025.1\captureAgent\debugger-agent.jar=file:///C:/Users/amite/AppData/Local/Temp/capture5572097374194403268.props --enable-preview -agentpath:C:\Users\amite\AppData\Local\Temp\idea_libasyncProfiler_dll_temp_folder3\libasyncProfiler.dll=version,jfr,event=wall,interval=10ms,cstack=no,file=C:\Users\amite\IdeaSnapshots\MainTrain_2025_06_09_173231.jfr,dbghelppath=C:\Users\amite\AppData\Local\Temp\idea_dbghelp_dll_temp_folder\dbghelp.dll,log=C:\Users\amite\AppData\Local\Temp\MainTrain_2025_06_09_173231.jfr.log.txt,logLevel=DEBUG -Dkotlinx.coroutines.debug.enable.creation.stack.trace=false -Ddebugger.agent.enable.coroutines=true -Dkotlinx.coroutines.debug.enable.flows.stack.trace=true -Dkotlinx.coroutines.debug.enable.mutable.state.flows.stack.trace=true -Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8 test.MainTrain
+Command Line: -agentlib:jdwp=transport=dt_socket,address=127.0.0.1:51115,suspend=y,server=n -javaagent:C:\Users\amite\AppData\Local\JetBrains\IntelliJIdea2025.1\captureAgent\debugger-agent.jar=file:///C:/Users/amite/AppData/Local/Temp/capture5572097374194403268.props --enable-preview -agentpath:C:\Users\amite\AppData\Local\Temp\idea_libasyncProfiler_dll_temp_folder3\libasyncProfiler.dll=version,jfr,event=wall,interval=10ms,cstack=no,file=C:\Users\amite\IdeaSnapshots\MainTrain_2025_06_09_173231.jfr,dbghelppath=C:\Users\amite\AppData\Local\Temp\idea_dbghelp_dll_temp_folder\dbghelp.dll,log=C:\Users\amite\AppData\Local\Temp\MainTrain_2025_06_09_173231.jfr.log.txt,logLevel=DEBUG -Dkotlinx.coroutines.debug.enable.creation.stack.trace=false -Ddebugger.agent.enable.coroutines=true -Dkotlinx.coroutines.debug.enable.flows.stack.trace=true -Dkotlinx.coroutines.debug.enable.mutable.state.flows.stack.trace=true -Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8 graph.MainTrain
 
 Host: 11th Gen Intel(R) Core(TM) i5-11500 @ 2.70GHz, 12 cores, 15G,  Windows 11 , 64 bit Build 26100 (10.0.26100.4202)
 Time: Mon Jun  9 17:34:04 2025  Windows 11 , 64 bit Build 26100 (10.0.26100.4202) elapsed time: 92.943748 seconds (0d 0h 1m 32s)
@@ -678,8 +678,8 @@ symbol engine: initialized successfully - sym options: 0x614 - pdb path: .;C:\Us
 
 VM Arguments:
 jvm_args: -agentlib:jdwp=transport=dt_socket,address=127.0.0.1:51115,suspend=y,server=n -javaagent:C:\Users\amite\AppData\Local\JetBrains\IntelliJIdea2025.1\captureAgent\debugger-agent.jar=file:///C:/Users/amite/AppData/Local/Temp/capture5572097374194403268.props --enable-preview -agentpath:C:\Users\amite\AppData\Local\Temp\idea_libasyncProfiler_dll_temp_folder3\libasyncProfiler.dll=version,jfr,event=wall,interval=10ms,cstack=no,file=C:\Users\amite\IdeaSnapshots\MainTrain_2025_06_09_173231.jfr,dbghelppath=C:\Users\amite\AppData\Local\Temp\idea_dbghelp_dll_temp_folder\dbghelp.dll,log=C:\Users\amite\AppData\Local\Temp\MainTrain_2025_06_09_173231.jfr.log.txt,logLevel=DEBUG -Dkotlinx.coroutines.debug.enable.creation.stack.trace=false -Ddebugger.agent.enable.coroutines=true -Dkotlinx.coroutines.debug.enable.flows.stack.trace=true -Dkotlinx.coroutines.debug.enable.mutable.state.flows.stack.trace=true -Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8 
-java_command: test.MainTrain
-java_class_path (initial): C:\Users\amite\Desktop\úéëðåú\úøâéìéí - ôúî 1\ModularPubSub\out\production\ModularPubSub;C:\Program Files\JetBrains\IntelliJ IDEA 2025.1.1.1\lib\idea_rt.jar
+java_command: graph.MainTrain
+java_class_path (initial): C:\Users\amite\Desktop\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ - ï¿½ï¿½ï¿½ 1\ModularPubSub\out\production\ModularPubSub;C:\Program Files\JetBrains\IntelliJ IDEA 2025.1.1.1\lib\idea_rt.jar
 Launcher Type: SUN_STANDARD
 
 [Global flags]

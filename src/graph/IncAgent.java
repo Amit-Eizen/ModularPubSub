@@ -1,6 +1,4 @@
-package test;
-
-import java.util.List;
+package graph;
 
 public class IncAgent implements Agent {
     private String name;

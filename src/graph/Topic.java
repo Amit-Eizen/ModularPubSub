@@ -1,5 +1,5 @@
 //package project_biu.test;
-package test;
+package graph;
 
 import java.util.ArrayList;
 import java.util.Collections;
